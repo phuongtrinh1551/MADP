@@ -736,7 +736,7 @@ configure: failed program was:
 configure:17449: result: no
 configure:17459: checking for library containing make_lp
 configure:17489: gcc -o conftest -g -O2   conftest.c -ldl -lm -lstdc++  >&5
-/usr/bin/ld: /tmp/ccwLuRZC.o: in function `main':
+/usr/bin/ld: /tmp/cct3kxwL.o: in function `main':
 /home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/conftest.c:35:(.text.startup+0xb): undefined reference to `make_lp'
 collect2: error: ld returned 1 exit status
 configure:17489: $? = 1
@@ -1485,24 +1485,34 @@ config.status:1215: creating src/libDAI/Makefile
 config.status:1215: creating src/solvers/Makefile
 config.status:1215: creating src/tests/Makefile
 config.status:1215: creating config.h
+config.status:1396: config.h is unchanged
 config.status:1444: executing depfiles commands
 config.status:1521: cd src/parser       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/base       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/support       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/planning       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/utils       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/examples       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/libDAI       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/solvers       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1521: cd src/tests       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
+make: Nothing to be done for 'am--depfiles'.
 config.status:1526: $? = 0
 config.status:1444: executing libtool commands
 

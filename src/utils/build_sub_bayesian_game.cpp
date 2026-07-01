@@ -71,13 +71,20 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
     }
     
     // fill local_types with the types in the "block"
-    for (int b:block){
-        int player = type_to_index[b];
-        if (player != -1) {
+    // for (int b:block){
+    //     int player = type_to_index[b];
+    //     if (player != -1) {
+    //         local_types[player].push_back(b);
+    //     }
+    // }
+    for (int b : block) {
+        auto it = type_to_index.find(b);
+        if (it != type_to_index.end()) {
+            int player = it->second;
             local_types[player].push_back(b);
         }
     }
-    
+
     int n1 = local_types[0].size();
     int n2 = local_types[1].size();
 
@@ -158,9 +165,24 @@ int main() {
     
     TwoPlayersBayesianGame subgame;
 
-    bg.setTypeNumbers({"2", "2"});
-    bg.setGameDimensions({"2", "2"}); //actions
+    int n1 = types[0].size();
+    int n2 = types[1].size();
+    int A1 = 2;
+    int A2 = 2;
+
+    bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
+
     bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"});
+
+    bg.setGameDimensions({std::to_string(A1), std::to_string(A2)}); //actions
+
+    for (int i =0; i<pow(A1,n1)*pow(A2,n2); i++){
+        std::vector<std::string> line;
+        int num = rand() % 10 + 1;
+        line.push_back(std::to_string(num));
+        bg.addPayoffLine(line);
+    }
+
     subgame = build_sub_bayesian_game(&bg, block, types);
     return 0;
 }
