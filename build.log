@@ -1,0 +1,64 @@
+make  all-recursive
+make[1]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP'
+Making all in src
+make[2]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src'
+Making all in libDAI
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/libDAI'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/libDAI'
+Making all in base
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/base'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/base'
+Making all in support
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/support'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/support'
+Making all in parser
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/parser'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/parser'
+Making all in planning
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/planning'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/planning'
+Making all in madp
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/madp'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/madp'
+Making all in utils
+make[3]: Entering directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/utils'
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o analyzeTimings analyzeTimings-analyzeTimings.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o getAvgReward getAvgReward-getAvgReward.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o analyzeRewardResults analyzeRewardResults-analyzeRewardResults.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o evaluatePerseusPolicy evaluatePerseusPolicy-evaluatePerseusPolicy.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o printJointPolicyPureVector printJointPolicyPureVector-printJointPolicyPureVector.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o printPolicyPureVector printPolicyPureVector-printPolicyPureVector.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o evaluateRandomPolicy evaluateRandomPolicy-evaluateRandomPolicy.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o evaluateJointPolicyPureVector evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o policyPureVectorToDotGraph policyPureVectorToDotGraph-policyPureVectorToDotGraph.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o calculateQheuristic calculateQheuristic-calculateQheuristic.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+make[3]: *** No rule to make target 'build_sub_bayesian_game.c', needed by 'build_sub_bayesian_game.o'.  Stop.
+make[3]: *** Waiting for unfinished jobs....
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o printProblemStats printProblemStats-printProblemStats.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o printProblem printProblem-printProblem.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+/bin/bash ../../libtool  --tag=CXX   --mode=link g++  -g -O2    -o prunePWLCValueFunction prunePWLCValueFunction-prunePWLCValueFunction.o ../../src/madp/libMADP.la  -lxml2 -lm -ldl -lm -lstdc++ 
+libtool: link: g++ -g -O2 -o .libs/analyzeTimings analyzeTimings-analyzeTimings.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/printJointPolicyPureVector printJointPolicyPureVector-printJointPolicyPureVector.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/evaluatePerseusPolicy evaluatePerseusPolicy-evaluatePerseusPolicy.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/analyzeRewardResults analyzeRewardResults-analyzeRewardResults.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/policyPureVectorToDotGraph policyPureVectorToDotGraph-policyPureVectorToDotGraph.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/evaluateRandomPolicy evaluateRandomPolicy-evaluateRandomPolicy.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/calculateQheuristic calculateQheuristic-calculateQheuristic.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/prunePWLCValueFunction prunePWLCValueFunction-prunePWLCValueFunction.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/printPolicyPureVector printPolicyPureVector-printPolicyPureVector.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/getAvgReward getAvgReward-getAvgReward.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/evaluateJointPolicyPureVector evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/printProblemStats printProblemStats-printProblemStats.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+libtool: link: g++ -g -O2 -o .libs/printProblem printProblem-printProblem.o  ../../src/madp/.libs/libMADP.so -lxml2 -ldl -lm -lstdc++
+make[3]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src/utils'
+make[2]: *** [Makefile:527: all-recursive] Error 1
+make[2]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/src'
+make[1]: *** [Makefile:427: all-recursive] Error 1
+make[1]: Leaving directory '/home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP'
+make: *** [Makefile:359: all] Error 2
