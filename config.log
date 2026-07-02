@@ -736,7 +736,7 @@ configure: failed program was:
 configure:17449: result: no
 configure:17459: checking for library containing make_lp
 configure:17489: gcc -o conftest -g -O2   conftest.c -ldl -lm -lstdc++  >&5
-/usr/bin/ld: /tmp/cct3kxwL.o: in function `main':
+/usr/bin/ld: /tmp/ccyeG3aV.o: in function `main':
 /home/phuong-trinh/Documents/4INFO/Stage/Inria/ckd-bayesian-games/stage2026/MADP/conftest.c:35:(.text.startup+0xb): undefined reference to `make_lp'
 collect2: error: ld returned 1 exit status
 configure:17489: $? = 1
