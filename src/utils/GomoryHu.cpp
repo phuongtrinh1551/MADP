@@ -3,19 +3,24 @@
 #include <sstream>
 #include <vector>
 #include <climits> 
+#include "GomoryHu.hpp"
 
 using namespace std;
 
 #define debug 0
 
-class GomoryHuTree
-{
+// class GomoryHuTree
+// {
 
-public: 
+// public: 
 
-GomoryHuTree(int number_vertices, std::vector<std::vector<int>> graph){
-this->sz=number_vertices;
-this->graph=graph;
+// GomoryHuTree(int number_vertices, std::vector<std::vector<int>> graph){
+// this->sz=number_vertices;
+// this->graph=graph;
+// }
+GomoryHuTree::GomoryHuTree(int number_vertices, std::vector<std::vector<int>> graph){
+	this->sz=number_vertices;
+	this->graph=graph;
 }
 
 int sz;
@@ -668,5 +673,5 @@ std::vector<std::vector<int>> buildGomoryHuTree()
 	//return 0;
 }
 
-};
+// };
 // ----------------------------------------------------------------------------

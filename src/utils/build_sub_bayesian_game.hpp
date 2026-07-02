@@ -2,8 +2,14 @@
 
 #include <vector>
 #include "two_players_bayesian_game.hpp"
-#include "GomoryHu.cpp"
+#include "GomoryHu.hpp"
 #include "dfs.hpp"
+
+struct MatrixWithIndices {
+    std::pair<int, int> indices; 
+    int weight;
+};
+std::vector<std::vector<MatrixWithIndices>> sorted_matrix(std::vector<std::vector<int>> matrix);
 
 std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types);
 

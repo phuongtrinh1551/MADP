@@ -5,58 +5,111 @@
 #include "dfs.hpp"
 #include <algorithm>
 #include <unordered_map>
+#include "GomoryHu.hpp"
 
-// std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types, int k, float eps){
-//     int n1 = types[0].size();
-//     int n2 = types[1].size();
+struct MatrixWithIndices {
+    std::pair<int, int> indices; 
+    int weight;
+};
 
-//     // build jointTypesProbabilities matrix
-//     auto jointTypesProbabilities = std::vector<std::vector<float>>(n1, std::vector<float>(n2, 0.0f));
-//     for (int i=0; i<n1; i++){
-//         for (int j=0; j<n2; j++){
-//             jointTypesProbabilities[i][j] = bg->getJointTypesProba({types[0][i], types[1][j]});
-//         }
-//     }
+std::vector<std::vector<MatrixWithIndices>> sorted_matrix(std::vector<std::vector<int>> matrix) {
+    int rows = matrix.size();
+    int cols = matrix[0].size();
 
-//     // transform to a graph with integer weights for Gomory-Hu tree
-//     int k1 = 0;
-//     int min_proba = jointTypesProbabilities[0][0];
-//     for (int i=0; i<n1; i++){
-//         for (int j=0; j<n2; j++){
-//             if (jointTypesProbabilities[i][j] > 0 && jointTypesProbabilities[i][j] < min_proba){
-//                 min_proba = jointTypesProbabilities[i][j];
-//             }
-//         }
-//     }
+    std::vector<std::vector<MatrixWithIndices>> temp_matrix(rows, std::vector<MatrixWithIndices>(cols));
+    std::vector<MatrixWithIndices> flat_matrix;
 
-//     while(min_proba*std::pow(10,k1)<1){  
-//         k1++;
-//     }
+    for(int i=0; i<rows; i++) {
+        for(int j=0; j<cols; j++) {
+            temp_matrix[i][j] = {{i, j}, matrix[i][j]};
+            flat_matrix.push_back(temp_matrix[i][j]);
+        }
+    }
 
-//     std::vector<std::vector<int>> graph = std::vector<std::vector<int>>(n1+n2, std::vector<int>(n1+n2, 0));
-//     for (int i=0; i<n1; i++){
-//         for (int j=0; j<n2; j++){
-//             graph[i][j] = static_cast<int>(jointTypesProbabilities[i][j]*std::pow(10,k));
-//         }
-//     }
+    std::sort(flat_matrix.begin(), flat_matrix.end(), [](const MatrixWithIndices &a, const MatrixWithIndices &b) {
+        return a.weight < b.weight;
+    });
 
-//     // k-cut problem
-//     // build GH tree
-//     GomoryHuTree gh(n1+n2, graph);
+    std::vector<std::vector<MatrixWithIndices>> sorted_matrix(rows, std::vector<MatrixWithIndices>(cols));
+    int k = 0;
+    for(int i=0; i<rows; i++) {
+        for(int j=0; j<cols; j++) {
+            sorted_matrix[i][j] = flat_matrix[k++];
+        }
+    }
 
-//     // remove k-1 edges + compare w eps
-//     for (int i=0;i<n1+n2;i++){
-//         for (int j=0;j<n1+n2;j++){
-//             if (gh.graph[i][j] > 0 && gh.graph[i][j] < eps*std::pow(10,k)){
-//                 gh.graph[i][j] = 0;
-//             }
-//         }
-//     }
+    // // debug : sorted matrix with indices
+    // for (int i=0; i<rows; i++){
+    //     for (int j=0; j<cols; j++){
+    //         std::cout << "Weight: " << sorted_matrix[i][j].weight << " Indices: (" << sorted_matrix[i][j].indices.first << ", " << sorted_matrix[i][j].indices.second << ") | ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
+    return sorted_matrix;
+}
+
+
+std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types, int k, float eps){
+    // BUILD GRAPH OF CK BLOCKS
+    int n1 = types[0].size();
+    int n2 = types[1].size();
+    // transform to a graph with integer weights for Gomory-Hu tree
+    int c = 0;
+    int min_proba = bg->getJointTypesProba({0,0});
+    for (int i=0; i<n1; i++){
+        for (int j=0; j<n2; j++){
+            if (bg->getJointTypesProba({i,j}) > 0 && bg->getJointTypesProba({i,j}) < min_proba){
+                min_proba = bg->getJointTypesProba({i,j});
+            }
+        }
+    }
+    // find the smallest c st min_proba*10^c >= 1
+    while(min_proba*std::pow(10,c)<1){  
+        c++;
+    }
+
+    std::vector<std::vector<int>> graph = std::vector<std::vector<int>>(n1+n2, std::vector<int>(n1+n2, 0));
+    for (int i=0; i<n1; i++){
+        for (int j=0; j<n2; j++){
+            graph[i][j] = static_cast<int>(bg->getJointTypesProba({i,j})*std::pow(10,c));
+        }
+    }
+
+    // k-cut problem: build GH tree -> sort edges -> remove edges with weight < eps*10^k 
+    // build GH tree
+    GomoryHuTree ght(n1+n2, graph);
+    std::vector<std::vector<int>> gomory_hu_tree = ght.buildGomoryHuTree();
+
+    // sort edges by weight with gomoryhu tree (=> same vertices as the original graph)
+    std::vector<std::vector<MatrixWithIndices>> sorted_edges = sorted_matrix(gomory_hu_tree);
     
+    // try to remove maximum edges + respect eps*10^k
+    int sum_removed_edges = 0;
+    int removed_edges = 0;
+    for (int i=0;i<sorted_edges.size();i++){
+        for (int j=0;j<sorted_edges.size();j++){
+            if (sorted_edges[i][j].weight > 0 && sorted_edges[i][j].weight < eps*std::pow(10,c)){
+                graph[sorted_edges[i][j].indices.first][sorted_edges[i][j].indices.second] = 0;
+                graph[sorted_edges[i][j].indices.second][sorted_edges[i][j].indices.first] = 0;
+                sum_removed_edges += sorted_edges[i][j].weight;
+                removed_edges++;
+            }
+        }
+    }
 
-//     return graph; // tam
-// }
+    // adapt types
+    block graph_float(n1 + n2, std::vector<float>(n1 + n2, 0.0f));
+    for (int i = 0; i < n1 + n2; i++) {
+        for (int j = 0; j < n1 + n2; j++) {
+            graph_float[i][j] = static_cast<float>(graph[i][j]);
+        }
+    }
+    // USE dfs TO FIND THE CONNECTED COMPONENTS OF THE GRAPH
+    std::vector<std::vector<int>> CKblocks = getListBlocks(graph_float);
+
+    return CKblocks;
+}
 
 TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const std::vector<std::vector<int>>& block, std::vector<std::vector<int>> types){
     TwoPlayersBayesianGame subgame;
@@ -121,13 +174,14 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
 
 
 // std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
-//     auto CK_blocks = build_CK_blocks(types, bg);
+//     std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 1, 0.01);
 
 //     std::vector<TwoPlayersBayesianGame> subgames;
 
-//     for (const auto &b : CK_blocks)
-//     {
-//         subgames.push_back(build_sub_bayesian_game(bg, b, types));
+//     for (int i = 0; i < CKblocks.size(); i++){
+//         std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
+//         TwoPlayersBayesianGame subgame = build_sub_bayesian_game(bg, block, types);
+//         subgames.push_back(subgame);
 //     }
 
 //     return subgames;
@@ -175,5 +229,10 @@ int main() {
     std::cout << bg.getJointTypesProba({0,0}) << " " << bg.getJointTypesProba({1,1}) << std::endl;
     std::cout << "Subgame joint type probabilities: " << std::endl;
     std::cout << subgame.getJointTypesProba({0,0}) << std::endl;
+
+    // // debug : sorted_matrix()
+    // std::vector<std::vector<int>> matrix = {{3, 1, 2}, {6, 5, 4}};
+    // sorted_matrix(matrix);
+
     return 0;
 }
