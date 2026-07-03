@@ -121,8 +121,6 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
             totalProb += p;
         }
     }
-    // // debug
-    // std::cout << "Total probability before normalization: " << totalProb << std::endl;
     
     // normalize
     if (totalProb > 0.0f){
@@ -158,19 +156,19 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
 }
 
 
-// std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
-//     std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 1, 0.01);
+std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
+    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 1, 0.01);
 
-//     std::vector<TwoPlayersBayesianGame> subgames;
+    std::vector<TwoPlayersBayesianGame> subgames;
 
-//     for (int i = 0; i < CKblocks.size(); i++){
-//         std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
-//         TwoPlayersBayesianGame subgame = build_sub_bayesian_game(bg, block, types);
-//         subgames.push_back(subgame);
-//     }
+    for (int i = 0; i < CKblocks.size(); i++){
+        std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
+        TwoPlayersBayesianGame subgame = build_sub_bayesian_game(bg, block, types);
+        subgames.push_back(subgame);
+    }
 
-//     return subgames;
-// }
+    return subgames;
+}
 
 
 int main() {
@@ -189,7 +187,7 @@ int main() {
 
     bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
 
-    // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it create a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
+    // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it creates a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
     bg.addJointTypeProbabilities({"0.05", "0.05", "0.01", "0.01"}); //type 0 of P1 with type 0 and 1 of P2
     bg.addJointTypeProbabilities({"0.2", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 and 1 of P2
     bg.addJointTypeProbabilities({"0.02", "0.02", "0.05", "0.1"}); 
@@ -215,26 +213,25 @@ int main() {
     std::cout << "Subgame joint type probabilities: " << std::endl;
     std::cout << subgame.getJointTypesProba({0,0}) << std::endl;
 
-    // // debug : sorted_matrix()
-    // std::vector<std::vector<int>> matrix = {{3, 1, 2}, {6, 5, 4}};
-    // sorted_matrix(matrix);
-    // std::cout << "Sorted matrix with indices: " << std::endl;
-    // for (int i=0; i<matrix.size(); i++){
-    //     for (int j=0; j<matrix[i].size(); j++){
-    //         std::cout << "Weight: " << matrix[i][j] << " Indices: (" << i << ", " << j << ") | ";
+    // debug : sorted_matrix()
+    std::vector<std::vector<int>> matrix = {{3, 1, 2}, {6, 5, 4}};
+    std::vector<MatrixWithIndices> sm = sorted_matrix(matrix);
+    std::cout << "Sorted matrix with indices: " << std::endl;
+    for (int i=0; i<sm.size(); i++){
+        std::cout << "Weight: " << sm[i].weight << ", Indices: (" << sm[i].indices.first << ", " << sm[i].indices.second << ")" << std::endl;
+    }
+
+    // std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.05);
+    // std::cout << "CK blocks: " << std::endl;
+    // for (int i=0; i<vect.size(); i++){
+    //     std::cout << "Block " << i << ": ";
+    //     for (int j=0; j<vect[i].size(); j++){
+    //         std::cout << vect[i][j] << " ";
     //     }
     //     std::cout << std::endl;
     // }
-
-    std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.01);
-    std::cout << "CK blocks: " << std::endl;
-    for (int i=0; i<vect.size(); i++){
-        std::cout << "Block " << i << ": ";
-        for (int j=0; j<vect[i].size(); j++){
-            std::cout << vect[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-
+    // for (int i=0;i<vect[0].size();i++){
+    //     std::cout << "vect[0][" << i << "] = " << vect[0][i] << std::endl;
+    // }
     return 0;
 }
