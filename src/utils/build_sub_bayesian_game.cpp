@@ -12,17 +12,15 @@ struct MatrixWithIndices {
     int weight;
 };
 
-std::vector<std::vector<MatrixWithIndices>> sorted_matrix(std::vector<std::vector<int>> matrix) {
+std::vector<MatrixWithIndices> sorted_matrix(std::vector<std::vector<int>> matrix) {
     int rows = matrix.size();
     int cols = matrix[0].size();
 
-    std::vector<std::vector<MatrixWithIndices>> temp_matrix(rows, std::vector<MatrixWithIndices>(cols));
     std::vector<MatrixWithIndices> flat_matrix;
 
     for(int i=0; i<rows; i++) {
         for(int j=0; j<cols; j++) {
-            temp_matrix[i][j] = {{i, j}, matrix[i][j]};
-            flat_matrix.push_back(temp_matrix[i][j]);
+            flat_matrix.push_back({{i, j}, matrix[i][j]});
         }
     }
 
@@ -30,23 +28,7 @@ std::vector<std::vector<MatrixWithIndices>> sorted_matrix(std::vector<std::vecto
         return a.weight < b.weight;
     });
 
-    std::vector<std::vector<MatrixWithIndices>> sorted_matrix(rows, std::vector<MatrixWithIndices>(cols));
-    int k = 0;
-    for(int i=0; i<rows; i++) {
-        for(int j=0; j<cols; j++) {
-            sorted_matrix[i][j] = flat_matrix[k++];
-        }
-    }
-
-    // // debug : sorted matrix with indices
-    // for (int i=0; i<rows; i++){
-    //     for (int j=0; j<cols; j++){
-    //         std::cout << "Weight: " << sorted_matrix[i][j].weight << " Indices: (" << sorted_matrix[i][j].indices.first << ", " << sorted_matrix[i][j].indices.second << ") | ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
-    return sorted_matrix;
+    return flat_matrix; 
 }
 
 
@@ -54,6 +36,7 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
     // BUILD GRAPH OF CK BLOCKS
     int n1 = types[0].size();
     int n2 = types[1].size();
+
     // transform to a graph with integer weights for Gomory-Hu tree
     int c = 0;
     int min_proba = bg->getJointTypesProba({0,0});
@@ -64,52 +47,54 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
             }
         }
     }
+    
     // find the smallest c st min_proba*10^c >= 1
     while(min_proba*std::pow(10,c)<1){  
         c++;
     }
 
     std::vector<std::vector<int>> graph = std::vector<std::vector<int>>(n1+n2, std::vector<int>(n1+n2, 0));
-    for (int i=0; i<n1; i++){
-        for (int j=0; j<n2; j++){
-            graph[i][j] = static_cast<int>(bg->getJointTypesProba({i,j})*std::pow(10,c));
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            graph[i][j+n1] = static_cast<int>(bg->getJointTypesProba({i, j}) * std::pow(10, c));
+            graph[j+n1][i] = static_cast<int>(bg->getJointTypesProba({i, j}) * std::pow(10, c));
         }
     }
 
-    // k-cut problem: build GH tree -> sort edges -> remove edges with weight < eps*10^k 
+    // k-cut problem: build GH tree -> sort edges -> remove edges with weight < eps*10^c
     // build GH tree
     GomoryHuTree ght(n1+n2, graph);
     std::vector<std::vector<int>> gomory_hu_tree = ght.buildGomoryHuTree();
 
     // sort edges by weight with gomoryhu tree (=> same vertices as the original graph)
-    std::vector<std::vector<MatrixWithIndices>> sorted_edges = sorted_matrix(gomory_hu_tree);
+    std::vector<MatrixWithIndices> sorted_edges = sorted_matrix(gomory_hu_tree);
     
-    // try to remove maximum edges + respect eps*10^k
+    // try to remove maximum edges + respect eps*10^c
     int sum_removed_edges = 0;
     int removed_edges = 0;
     for (int i=0;i<sorted_edges.size();i++){
-        for (int j=0;j<sorted_edges.size();j++){
-            if (sorted_edges[i][j].weight > 0 && sorted_edges[i][j].weight < eps*std::pow(10,c)){
-                graph[sorted_edges[i][j].indices.first][sorted_edges[i][j].indices.second] = 0;
-                graph[sorted_edges[i][j].indices.second][sorted_edges[i][j].indices.first] = 0;
-                sum_removed_edges += sorted_edges[i][j].weight;
-                removed_edges++;
-            }
+        if (sorted_edges[i].weight > 0 && sorted_edges[i].weight < eps*std::pow(10,c)){
+            graph[sorted_edges[i].indices.first][sorted_edges[i].indices.second] = 0;
+            graph[sorted_edges[i].indices.second][sorted_edges[i].indices.first] = 0;
+            sum_removed_edges += sorted_edges[i].weight;
+            removed_edges++;
         }
     }
 
-    // adapt types
-    block graph_float(n1 + n2, std::vector<float>(n1 + n2, 0.0f));
-    for (int i = 0; i < n1 + n2; i++) {
-        for (int j = 0; j < n1 + n2; j++) {
-            graph_float[i][j] = static_cast<float>(graph[i][j]);
+    // reverse transform to a matrix proba
+    std::vector<std::vector<float>> matrix_proba(n1, std::vector<float>(n2, 0.0f));
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            matrix_proba[i][j] = static_cast<float>(graph[i][j+n1]) / (std::pow(10,c)); 
         }
     }
+
     // USE dfs TO FIND THE CONNECTED COMPONENTS OF THE GRAPH
-    std::vector<std::vector<int>> CKblocks = getListBlocks(graph_float);
+    std::vector<std::vector<int>> CKblocks = getListBlocks(matrix_proba);
 
     return CKblocks;
 }
+
 
 TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const std::vector<std::vector<int>>& block, std::vector<std::vector<int>> types){
     TwoPlayersBayesianGame subgame;
@@ -205,10 +190,10 @@ int main() {
     bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
 
     // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it create a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
-    bg.addJointTypeProbabilities({"0.1", "0.1", "0", "0"}); //type 0 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0.2", "0.2", "0", "0"}); //type 1 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0", "0", "0.1", "0.1"}); 
-    bg.addJointTypeProbabilities({"0", "0", "0.1", "0.1"});
+    bg.addJointTypeProbabilities({"0.05", "0.05", "0.01", "0.01"}); //type 0 of P1 with type 0 and 1 of P2
+    bg.addJointTypeProbabilities({"0.2", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 and 1 of P2
+    bg.addJointTypeProbabilities({"0.02", "0.02", "0.05", "0.1"}); 
+    bg.addJointTypeProbabilities({"0.02", "0.05", "0.11", "0.1"}); 
 
     bg.setGameDimensions({std::to_string(A1), std::to_string(A2)}); //actions
 
@@ -233,6 +218,23 @@ int main() {
     // // debug : sorted_matrix()
     // std::vector<std::vector<int>> matrix = {{3, 1, 2}, {6, 5, 4}};
     // sorted_matrix(matrix);
+    // std::cout << "Sorted matrix with indices: " << std::endl;
+    // for (int i=0; i<matrix.size(); i++){
+    //     for (int j=0; j<matrix[i].size(); j++){
+    //         std::cout << "Weight: " << matrix[i][j] << " Indices: (" << i << ", " << j << ") | ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.01);
+    std::cout << "CK blocks: " << std::endl;
+    for (int i=0; i<vect.size(); i++){
+        std::cout << "Block " << i << ": ";
+        for (int j=0; j<vect[i].size(); j++){
+            std::cout << vect[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }
