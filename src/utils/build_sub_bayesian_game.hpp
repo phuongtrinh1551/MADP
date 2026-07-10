@@ -11,6 +11,8 @@ struct MatrixWithIndices {
 };
 std::vector<std::vector<MatrixWithIndices>> sorted_matrix(std::vector<std::vector<int>> matrix);
 
+bool isImportantEdge(int a, int b, const std::vector<std::pair<int,int>>& important_edges);
+
 std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types);
 
 TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const std::vector<int>& block, int n);

@@ -31,15 +31,32 @@ std::vector<MatrixWithIndices> sorted_matrix(std::vector<std::vector<int>> matri
     return flat_matrix; 
 }
 
+// check important edges in the GH tree (weight > 0) are in the original graph
+bool isImportantEdge(int a, int b, const std::vector<std::pair<int,int>>& important_edges){
+    for(auto e: important_edges){
+        if((e.first==a && e.second==b) || (e.first==b && e.second==a)){
+            return true;
+        }    
+    }
+    return false;
+}
 
 std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types, int k, float eps){
     // BUILD GRAPH OF CK BLOCKS
     int n1 = types[0].size();
     int n2 = types[1].size();
 
+    // extract joint type probabilities from bg
+    std::vector<std::vector<float>> matrix_proba(n1, std::vector<float>(n2, 0.0f));
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            matrix_proba[i][j] = bg->getJointTypesProba({i, j});
+        }
+    }
+    
     // transform to a graph with integer weights for Gomory-Hu tree
     int c = 0;
-    int min_proba = bg->getJointTypesProba({0,0});
+    float min_proba = bg->getJointTypesProba({0,0});
     for (int i=0; i<n1; i++){
         for (int j=0; j<n2; j++){
             if (bg->getJointTypesProba({i,j}) > 0 && bg->getJointTypesProba({i,j}) < min_proba){
@@ -49,9 +66,10 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
     }
     
     // find the smallest c st min_proba*10^c >= 1
-    while(min_proba*std::pow(10,c)<1){  
+    while(min_proba*std::pow(10,c)<1000000.0f){  
         c++;
     }
+    std::cout<< "min_proba: " << min_proba << ", c: " << c << "\n" << std::endl;
 
     std::vector<std::vector<int>> graph = std::vector<std::vector<int>>(n1+n2, std::vector<int>(n1+n2, 0));
     for (int i = 0; i < n1; i++) {
@@ -61,33 +79,105 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
         }
     }
 
-    // k-cut problem: build GH tree -> sort edges -> remove edges with weight < eps*10^c
+    // visualize graph before removing edges
+    std::cout << "Graph before removing edges: " << std::endl;
+    for (int i=0;i<graph.size();i++){
+        for (int j=0;j<graph[i].size();j++){
+            std::cout << graph[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
+
+    // cut edges: build GH tree -> sort edges -> remove edges with weight < eps*10^c
     // build GH tree
     GomoryHuTree ght(n1+n2, graph);
     std::vector<std::vector<int>> gomory_hu_tree = ght.buildGomoryHuTree();
 
-    // sort edges by weight with gomoryhu tree (=> same vertices as the original graph)
-    std::vector<MatrixWithIndices> sorted_edges = sorted_matrix(gomory_hu_tree);
+    // visualize GH tree
+    std::cout << "Gomory-Hu tree: " << std::endl;
+    for (int i=0;i<gomory_hu_tree.size();i++){
+        for (int j=0;j<gomory_hu_tree[i].size();j++){
+            std::cout << gomory_hu_tree[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
     
-    // try to remove maximum edges + respect eps*10^c
-    int sum_removed_edges = 0;
-    int removed_edges = 0;
-    for (int i=0;i<sorted_edges.size();i++){
-        if (sorted_edges[i].weight > 0 && sorted_edges[i].weight < eps*std::pow(10,c)){
-            graph[sorted_edges[i].indices.first][sorted_edges[i].indices.second] = 0;
-            graph[sorted_edges[i].indices.second][sorted_edges[i].indices.first] = 0;
-            sum_removed_edges += sorted_edges[i].weight;
-            removed_edges++;
+    // extract important edges from GH tree (edges with weight > 0)
+    std::vector<std::pair<int,int>> important_edges;
+    for(int i=0;i<n1+n2;i++){
+        for(int j=i+1;j<n1+n2;j++){
+            if(gomory_hu_tree[i][j] > 0){
+                important_edges.push_back({i,j});
+            }
         }
     }
 
-    // reverse transform to a matrix proba
-    std::vector<std::vector<float>> matrix_proba(n1, std::vector<float>(n2, 0.0f));
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2; j++) {
-            matrix_proba[i][j] = static_cast<float>(graph[i][j+n1]) / (std::pow(10,c)); 
+    // sort edges by weight with GH tree (same vertices as the ori.graph)
+    std::vector<MatrixWithIndices> sorted_edges = sorted_matrix(graph);
+
+    // try to remove maximum edges + respect eps*10^c
+    int sum_removed_edges = 0;
+    int removed_edges = 0;
+    // for (int i=0;i<sorted_edges.size();i++){
+    //     if (sorted_edges[i].weight > 0 && sorted_edges[i].weight < eps*std::pow(10,c) && ){
+    //         graph[sorted_edges[i].indices.first][sorted_edges[i].indices.second] = 0;
+    //         graph[sorted_edges[i].indices.second][sorted_edges[i].indices.first] = 0;
+    //         sum_removed_edges += sorted_edges[i].weight;
+    //         // std::cout << "Removed edge: (" << sorted_edges[i].indices.first << ", " << sorted_edges[i].indices.second << "), weight: " << sorted_edges[i].weight << std::endl;
+    //         removed_edges++;
+    //     }
+        
+    // }
+    for(auto edge : sorted_edges){
+        if(edge.weight < eps*pow(10,c) && !isImportantEdge(edge.indices.first,edge.indices.second,important_edges)){
+            graph[edge.indices.first][edge.indices.second]=0;
+            graph[edge.indices.second][edge.indices.first]=0;
         }
     }
+
+    // sum removed
+    std::cout << "Removed edges: " << removed_edges << ", sum of removed edges: " << sum_removed_edges << std::endl;
+
+    // visualize graph after removing edges 
+    std::cout << "Graph after removing edges: " << std::endl;
+    for (int i=0;i<graph.size();i++){
+        for (int j=0;j<graph[i].size();j++){
+            std::cout << graph[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
+
+    // visualize matrix proba before removing edges by eps
+    std::cout << "Matrix proba before removing edges by eps: " << std::endl;
+    for (int i=0;i<matrix_proba.size();i++){
+        for (int j=0;j<matrix_proba[i].size();j++){
+            std::cout << matrix_proba[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
+
+    // update matrix_proba
+    for (int i=0; i<n1; i++){
+        for (int j=0; j<n2; j++){
+            if (graph[i][j+n1] == 0){
+                matrix_proba[i][j] = 0.0f;
+            }
+        }
+    }
+
+    // visualize matrix proba after removing edges by eps
+    std::cout << "Matrix proba after removing edges: " << std::endl;
+    for (int i=0;i<matrix_proba.size();i++){
+        for (int j=0;j<matrix_proba[i].size();j++){
+            std::cout << matrix_proba[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
 
     // USE dfs TO FIND THE CONNECTED COMPONENTS OF THE GRAPH
     std::vector<std::vector<int>> CKblocks = getListBlocks(matrix_proba);
@@ -157,7 +247,7 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
 
 
 std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
-    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 1, 0.01);
+    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 2, 0.01);
 
     std::vector<TwoPlayersBayesianGame> subgames;
 
@@ -188,10 +278,10 @@ int main() {
     bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
 
     // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it creates a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
-    bg.addJointTypeProbabilities({"0.05", "0.05", "0.01", "0.01"}); //type 0 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0.2", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0.02", "0.02", "0.05", "0.1"}); 
-    bg.addJointTypeProbabilities({"0.02", "0.05", "0.11", "0.1"}); 
+    bg.addJointTypeProbabilities({"0.16", "0.05", "0.005", "0.005"}); //type 0 of P1 with type 0 and 1 of P2
+    bg.addJointTypeProbabilities({"0.1", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 and 1 of P2
+    bg.addJointTypeProbabilities({"0.01", "0.02", "0.09", "0.1"}); 
+    bg.addJointTypeProbabilities({"0.02", "0.01", "0.11", "0.1"}); 
 
     bg.setGameDimensions({std::to_string(A1), std::to_string(A2)}); //actions
 
@@ -203,35 +293,35 @@ int main() {
     }
 
     subgame = build_sub_bayesian_game(&bg, block, types);
-    // // debug
-    // std::cout << "nb row bg: " << bg.jointTypeProbabilities.size() << std::endl;
-    // if(bg.jointTypeProbabilities.size() > 0) {
-    //     std::cout << "nb col of row 0: " << bg.jointTypeProbabilities[0].size() << std::endl;
-    // }
+    
     std::cout<< "Original game joint type probabilities: " << std::endl;
-    std::cout << bg.getJointTypesProba({0,0}) << " " << bg.getJointTypesProba({1,1}) << std::endl;
-    std::cout << "Subgame joint type probabilities: " << std::endl;
-    std::cout << subgame.getJointTypesProba({0,0}) << std::endl;
-
-    // debug : sorted_matrix()
-    std::vector<std::vector<int>> matrix = {{3, 1, 2}, {6, 5, 4}};
-    std::vector<MatrixWithIndices> sm = sorted_matrix(matrix);
-    std::cout << "Sorted matrix with indices: " << std::endl;
-    for (int i=0; i<sm.size(); i++){
-        std::cout << "Weight: " << sm[i].weight << ", Indices: (" << sm[i].indices.first << ", " << sm[i].indices.second << ")" << std::endl;
+    for (int i=0; i<bg.jointTypeProbabilities.size(); i++){
+        for (int j=0; j<bg.jointTypeProbabilities[i].size(); j++){
+            std::cout << bg.jointTypeProbabilities[i][j] << " ";
+        }
+        std::cout << std::endl;
     }
+    std::cout<< "\n";
 
-    // std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.05);
-    // std::cout << "CK blocks: " << std::endl;
-    // for (int i=0; i<vect.size(); i++){
-    //     std::cout << "Block " << i << ": ";
-    //     for (int j=0; j<vect[i].size(); j++){
-    //         std::cout << vect[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-    // for (int i=0;i<vect[0].size();i++){
-    //     std::cout << "vect[0][" << i << "] = " << vect[0][i] << std::endl;
-    // }
+    std::cout << "Subgame joint type probabilities: " << std::endl;
+    for (int i=0; i<subgame.jointTypeProbabilities.size(); i++){
+        for (int j=0; j<subgame.jointTypeProbabilities[i].size(); j++){
+            std::cout << subgame.jointTypeProbabilities[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout<< "\n";
+    
+
+    std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.09);
+    std::cout << "CK blocks: " << std::endl;
+    for (int i=0; i<vect.size(); i++){
+        std::cout << "Block " << i << ": "; 
+        for (int j=0; j<vect[i].size(); j++){
+            std::cout << vect[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    
     return 0;
 }
