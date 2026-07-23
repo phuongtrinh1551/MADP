@@ -117,7 +117,7 @@ am__EXEEXT_1 = analyzeTimings$(EXEEXT) evaluatePerseusPolicy$(EXEEXT) \
 	evaluateJointPolicyPureVector$(EXEEXT) \
 	calculateQheuristic$(EXEEXT) printProblem$(EXEEXT) \
 	printProblemStats$(EXEEXT) prunePWLCValueFunction$(EXEEXT) \
-	build_sub_bayesian_game$(EXEEXT)
+	build_sub_bayesian_game$(EXEEXT) test_decompBG$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" \
 	"$(DESTDIR)$(libdir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -170,6 +170,7 @@ analyzeTimings_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(analyzeTimings_LDFLAGS) $(LDFLAGS) -o $@
 am_build_sub_bayesian_game_OBJECTS =  \
 	build_sub_bayesian_game-build_sub_bayesian_game.$(OBJEXT) \
+	build_sub_bayesian_game-test_decompBG.$(OBJEXT) \
 	build_sub_bayesian_game-two_players_bayesian_game.$(OBJEXT) \
 	build_sub_bayesian_game-dfs.$(OBJEXT) \
 	build_sub_bayesian_game-GomoryHu.$(OBJEXT)
@@ -252,6 +253,15 @@ prunePWLCValueFunction_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(prunePWLCValueFunction_CXXFLAGS) $(CXXFLAGS) \
 	$(prunePWLCValueFunction_LDFLAGS) $(LDFLAGS) -o $@
+am_test_decompBG_OBJECTS = test_decompBG-test_decompBG.$(OBJEXT) \
+	test_decompBG-build_sub_bayesian_game.$(OBJEXT) \
+	test_decompBG-two_players_bayesian_game.$(OBJEXT) \
+	test_decompBG-dfs.$(OBJEXT) test_decompBG-GomoryHu.$(OBJEXT)
+test_decompBG_OBJECTS = $(am_test_decompBG_OBJECTS)
+test_decompBG_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(test_decompBG_CXXFLAGS) $(CXXFLAGS) $(test_decompBG_LDFLAGS) \
+	$(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -273,6 +283,7 @@ am__depfiles_remade =  \
 	./$(DEPDIR)/build_sub_bayesian_game-GomoryHu.Po \
 	./$(DEPDIR)/build_sub_bayesian_game-build_sub_bayesian_game.Po \
 	./$(DEPDIR)/build_sub_bayesian_game-dfs.Po \
+	./$(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po \
 	./$(DEPDIR)/build_sub_bayesian_game-two_players_bayesian_game.Po \
 	./$(DEPDIR)/calculateQheuristic-calculateQheuristic.Po \
 	./$(DEPDIR)/evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.Po \
@@ -284,7 +295,12 @@ am__depfiles_remade =  \
 	./$(DEPDIR)/printPolicyPureVector-printPolicyPureVector.Po \
 	./$(DEPDIR)/printProblem-printProblem.Po \
 	./$(DEPDIR)/printProblemStats-printProblemStats.Po \
-	./$(DEPDIR)/prunePWLCValueFunction-prunePWLCValueFunction.Po
+	./$(DEPDIR)/prunePWLCValueFunction-prunePWLCValueFunction.Po \
+	./$(DEPDIR)/test_decompBG-GomoryHu.Po \
+	./$(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po \
+	./$(DEPDIR)/test_decompBG-dfs.Po \
+	./$(DEPDIR)/test_decompBG-test_decompBG.Po \
+	./$(DEPDIR)/test_decompBG-two_players_bayesian_game.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -313,7 +329,8 @@ SOURCES = $(analyzeRewardResults_SOURCES) $(analyzeTimings_SOURCES) \
 	$(policyPureVectorToDotGraph_SOURCES) \
 	$(printJointPolicyPureVector_SOURCES) \
 	$(printPolicyPureVector_SOURCES) $(printProblem_SOURCES) \
-	$(printProblemStats_SOURCES) $(prunePWLCValueFunction_SOURCES)
+	$(printProblemStats_SOURCES) $(prunePWLCValueFunction_SOURCES) \
+	$(test_decompBG_SOURCES)
 DIST_SOURCES = $(analyzeRewardResults_SOURCES) \
 	$(analyzeTimings_SOURCES) $(build_sub_bayesian_game_SOURCES) \
 	$(calculateQheuristic_SOURCES) \
@@ -323,7 +340,8 @@ DIST_SOURCES = $(analyzeRewardResults_SOURCES) \
 	$(policyPureVectorToDotGraph_SOURCES) \
 	$(printJointPolicyPureVector_SOURCES) \
 	$(printPolicyPureVector_SOURCES) $(printProblem_SOURCES) \
-	$(printProblemStats_SOURCES) $(prunePWLCValueFunction_SOURCES)
+	$(printProblemStats_SOURCES) $(prunePWLCValueFunction_SOURCES) \
+	$(test_decompBG_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -593,7 +611,8 @@ PROGRAMS_NORMAL = \
  printProblem\
  printProblemStats\
  prunePWLCValueFunction\
- build_sub_bayesian_game
+ build_sub_bayesian_game\
+ test_decompBG
 
 
 ##############
@@ -728,6 +747,7 @@ prunePWLCValueFunction_CFLAGS =
 # Build build_sub_bayesian_game
 build_sub_bayesian_game_SOURCES = \
  build_sub_bayesian_game.cpp \
+ test_decompBG.cpp\
  two_players_bayesian_game.cpp \
  dfs.cpp \
  GomoryHu.cpp
@@ -738,6 +758,21 @@ build_sub_bayesian_game_DEPENDENCIES = $(MADPLIBS_NORMAL)
 build_sub_bayesian_game_CPPFLAGS = $(AM_CPPFLAGS) $(CPP_OPTIMIZATION_FLAGS)
 build_sub_bayesian_game_CXXFLAGS = $(CSTANDARD)
 build_sub_bayesian_game_CFLAGS = 
+
+# Build test_decompBG
+test_decompBG_SOURCES = \
+ test_decompBG.cpp \
+ build_sub_bayesian_game.cpp \
+ two_players_bayesian_game.cpp \
+ dfs.cpp \
+ GomoryHu.cpp
+
+test_decompBG_LDADD = $(MADPLIBS_NORMAL_NOPARSER) $(MADP_LD)
+test_decompBG_LDFLAGS = $(AM_LDFLAGS) 
+test_decompBG_DEPENDENCIES = $(MADPLIBS_NORMAL_NOPARSER)
+test_decompBG_CPPFLAGS = $(AM_CPPFLAGS) $(CPP_OPTIMIZATION_FLAGS)
+test_decompBG_CXXFLAGS = $(CSTANDARD)
+test_decompBG_CFLAGS = 
 
 ###############
 # All DYNAMIC libraries
@@ -978,6 +1013,10 @@ prunePWLCValueFunction$(EXEEXT): $(prunePWLCValueFunction_OBJECTS) $(prunePWLCVa
 	@rm -f prunePWLCValueFunction$(EXEEXT)
 	$(AM_V_CXXLD)$(prunePWLCValueFunction_LINK) $(prunePWLCValueFunction_OBJECTS) $(prunePWLCValueFunction_LDADD) $(LIBS)
 
+test_decompBG$(EXEEXT): $(test_decompBG_OBJECTS) $(test_decompBG_DEPENDENCIES) $(EXTRA_test_decompBG_DEPENDENCIES) 
+	@rm -f test_decompBG$(EXEEXT)
+	$(AM_V_CXXLD)$(test_decompBG_LINK) $(test_decompBG_OBJECTS) $(test_decompBG_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -989,6 +1028,7 @@ include ./$(DEPDIR)/analyzeTimings-analyzeTimings.Po # am--include-marker
 include ./$(DEPDIR)/build_sub_bayesian_game-GomoryHu.Po # am--include-marker
 include ./$(DEPDIR)/build_sub_bayesian_game-build_sub_bayesian_game.Po # am--include-marker
 include ./$(DEPDIR)/build_sub_bayesian_game-dfs.Po # am--include-marker
+include ./$(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po # am--include-marker
 include ./$(DEPDIR)/build_sub_bayesian_game-two_players_bayesian_game.Po # am--include-marker
 include ./$(DEPDIR)/calculateQheuristic-calculateQheuristic.Po # am--include-marker
 include ./$(DEPDIR)/evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.Po # am--include-marker
@@ -1001,6 +1041,11 @@ include ./$(DEPDIR)/printPolicyPureVector-printPolicyPureVector.Po # am--include
 include ./$(DEPDIR)/printProblem-printProblem.Po # am--include-marker
 include ./$(DEPDIR)/printProblemStats-printProblemStats.Po # am--include-marker
 include ./$(DEPDIR)/prunePWLCValueFunction-prunePWLCValueFunction.Po # am--include-marker
+include ./$(DEPDIR)/test_decompBG-GomoryHu.Po # am--include-marker
+include ./$(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po # am--include-marker
+include ./$(DEPDIR)/test_decompBG-dfs.Po # am--include-marker
+include ./$(DEPDIR)/test_decompBG-test_decompBG.Po # am--include-marker
+include ./$(DEPDIR)/test_decompBG-two_players_bayesian_game.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1073,6 +1118,20 @@ build_sub_bayesian_game-build_sub_bayesian_game.obj: build_sub_bayesian_game.cpp
 #	$(AM_V_CXX)source='build_sub_bayesian_game.cpp' object='build_sub_bayesian_game-build_sub_bayesian_game.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -c -o build_sub_bayesian_game-build_sub_bayesian_game.obj `if test -f 'build_sub_bayesian_game.cpp'; then $(CYGPATH_W) 'build_sub_bayesian_game.cpp'; else $(CYGPATH_W) '$(srcdir)/build_sub_bayesian_game.cpp'; fi`
+
+build_sub_bayesian_game-test_decompBG.o: test_decompBG.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -MT build_sub_bayesian_game-test_decompBG.o -MD -MP -MF $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Tpo -c -o build_sub_bayesian_game-test_decompBG.o `test -f 'test_decompBG.cpp' || echo '$(srcdir)/'`test_decompBG.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Tpo $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po
+#	$(AM_V_CXX)source='test_decompBG.cpp' object='build_sub_bayesian_game-test_decompBG.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -c -o build_sub_bayesian_game-test_decompBG.o `test -f 'test_decompBG.cpp' || echo '$(srcdir)/'`test_decompBG.cpp
+
+build_sub_bayesian_game-test_decompBG.obj: test_decompBG.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -MT build_sub_bayesian_game-test_decompBG.obj -MD -MP -MF $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Tpo -c -o build_sub_bayesian_game-test_decompBG.obj `if test -f 'test_decompBG.cpp'; then $(CYGPATH_W) 'test_decompBG.cpp'; else $(CYGPATH_W) '$(srcdir)/test_decompBG.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Tpo $(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po
+#	$(AM_V_CXX)source='test_decompBG.cpp' object='build_sub_bayesian_game-test_decompBG.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -c -o build_sub_bayesian_game-test_decompBG.obj `if test -f 'test_decompBG.cpp'; then $(CYGPATH_W) 'test_decompBG.cpp'; else $(CYGPATH_W) '$(srcdir)/test_decompBG.cpp'; fi`
 
 build_sub_bayesian_game-two_players_bayesian_game.o: two_players_bayesian_game.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(build_sub_bayesian_game_CPPFLAGS) $(CPPFLAGS) $(build_sub_bayesian_game_CXXFLAGS) $(CXXFLAGS) -MT build_sub_bayesian_game-two_players_bayesian_game.o -MD -MP -MF $(DEPDIR)/build_sub_bayesian_game-two_players_bayesian_game.Tpo -c -o build_sub_bayesian_game-two_players_bayesian_game.o `test -f 'two_players_bayesian_game.cpp' || echo '$(srcdir)/'`two_players_bayesian_game.cpp
@@ -1270,6 +1329,76 @@ prunePWLCValueFunction-prunePWLCValueFunction.obj: prunePWLCValueFunction.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(prunePWLCValueFunction_CPPFLAGS) $(CPPFLAGS) $(prunePWLCValueFunction_CXXFLAGS) $(CXXFLAGS) -c -o prunePWLCValueFunction-prunePWLCValueFunction.obj `if test -f 'prunePWLCValueFunction.cpp'; then $(CYGPATH_W) 'prunePWLCValueFunction.cpp'; else $(CYGPATH_W) '$(srcdir)/prunePWLCValueFunction.cpp'; fi`
 
+test_decompBG-test_decompBG.o: test_decompBG.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-test_decompBG.o -MD -MP -MF $(DEPDIR)/test_decompBG-test_decompBG.Tpo -c -o test_decompBG-test_decompBG.o `test -f 'test_decompBG.cpp' || echo '$(srcdir)/'`test_decompBG.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-test_decompBG.Tpo $(DEPDIR)/test_decompBG-test_decompBG.Po
+#	$(AM_V_CXX)source='test_decompBG.cpp' object='test_decompBG-test_decompBG.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-test_decompBG.o `test -f 'test_decompBG.cpp' || echo '$(srcdir)/'`test_decompBG.cpp
+
+test_decompBG-test_decompBG.obj: test_decompBG.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-test_decompBG.obj -MD -MP -MF $(DEPDIR)/test_decompBG-test_decompBG.Tpo -c -o test_decompBG-test_decompBG.obj `if test -f 'test_decompBG.cpp'; then $(CYGPATH_W) 'test_decompBG.cpp'; else $(CYGPATH_W) '$(srcdir)/test_decompBG.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-test_decompBG.Tpo $(DEPDIR)/test_decompBG-test_decompBG.Po
+#	$(AM_V_CXX)source='test_decompBG.cpp' object='test_decompBG-test_decompBG.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-test_decompBG.obj `if test -f 'test_decompBG.cpp'; then $(CYGPATH_W) 'test_decompBG.cpp'; else $(CYGPATH_W) '$(srcdir)/test_decompBG.cpp'; fi`
+
+test_decompBG-build_sub_bayesian_game.o: build_sub_bayesian_game.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-build_sub_bayesian_game.o -MD -MP -MF $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Tpo -c -o test_decompBG-build_sub_bayesian_game.o `test -f 'build_sub_bayesian_game.cpp' || echo '$(srcdir)/'`build_sub_bayesian_game.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Tpo $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po
+#	$(AM_V_CXX)source='build_sub_bayesian_game.cpp' object='test_decompBG-build_sub_bayesian_game.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-build_sub_bayesian_game.o `test -f 'build_sub_bayesian_game.cpp' || echo '$(srcdir)/'`build_sub_bayesian_game.cpp
+
+test_decompBG-build_sub_bayesian_game.obj: build_sub_bayesian_game.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-build_sub_bayesian_game.obj -MD -MP -MF $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Tpo -c -o test_decompBG-build_sub_bayesian_game.obj `if test -f 'build_sub_bayesian_game.cpp'; then $(CYGPATH_W) 'build_sub_bayesian_game.cpp'; else $(CYGPATH_W) '$(srcdir)/build_sub_bayesian_game.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Tpo $(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po
+#	$(AM_V_CXX)source='build_sub_bayesian_game.cpp' object='test_decompBG-build_sub_bayesian_game.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-build_sub_bayesian_game.obj `if test -f 'build_sub_bayesian_game.cpp'; then $(CYGPATH_W) 'build_sub_bayesian_game.cpp'; else $(CYGPATH_W) '$(srcdir)/build_sub_bayesian_game.cpp'; fi`
+
+test_decompBG-two_players_bayesian_game.o: two_players_bayesian_game.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-two_players_bayesian_game.o -MD -MP -MF $(DEPDIR)/test_decompBG-two_players_bayesian_game.Tpo -c -o test_decompBG-two_players_bayesian_game.o `test -f 'two_players_bayesian_game.cpp' || echo '$(srcdir)/'`two_players_bayesian_game.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-two_players_bayesian_game.Tpo $(DEPDIR)/test_decompBG-two_players_bayesian_game.Po
+#	$(AM_V_CXX)source='two_players_bayesian_game.cpp' object='test_decompBG-two_players_bayesian_game.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-two_players_bayesian_game.o `test -f 'two_players_bayesian_game.cpp' || echo '$(srcdir)/'`two_players_bayesian_game.cpp
+
+test_decompBG-two_players_bayesian_game.obj: two_players_bayesian_game.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-two_players_bayesian_game.obj -MD -MP -MF $(DEPDIR)/test_decompBG-two_players_bayesian_game.Tpo -c -o test_decompBG-two_players_bayesian_game.obj `if test -f 'two_players_bayesian_game.cpp'; then $(CYGPATH_W) 'two_players_bayesian_game.cpp'; else $(CYGPATH_W) '$(srcdir)/two_players_bayesian_game.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-two_players_bayesian_game.Tpo $(DEPDIR)/test_decompBG-two_players_bayesian_game.Po
+#	$(AM_V_CXX)source='two_players_bayesian_game.cpp' object='test_decompBG-two_players_bayesian_game.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-two_players_bayesian_game.obj `if test -f 'two_players_bayesian_game.cpp'; then $(CYGPATH_W) 'two_players_bayesian_game.cpp'; else $(CYGPATH_W) '$(srcdir)/two_players_bayesian_game.cpp'; fi`
+
+test_decompBG-dfs.o: dfs.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-dfs.o -MD -MP -MF $(DEPDIR)/test_decompBG-dfs.Tpo -c -o test_decompBG-dfs.o `test -f 'dfs.cpp' || echo '$(srcdir)/'`dfs.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-dfs.Tpo $(DEPDIR)/test_decompBG-dfs.Po
+#	$(AM_V_CXX)source='dfs.cpp' object='test_decompBG-dfs.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-dfs.o `test -f 'dfs.cpp' || echo '$(srcdir)/'`dfs.cpp
+
+test_decompBG-dfs.obj: dfs.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-dfs.obj -MD -MP -MF $(DEPDIR)/test_decompBG-dfs.Tpo -c -o test_decompBG-dfs.obj `if test -f 'dfs.cpp'; then $(CYGPATH_W) 'dfs.cpp'; else $(CYGPATH_W) '$(srcdir)/dfs.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-dfs.Tpo $(DEPDIR)/test_decompBG-dfs.Po
+#	$(AM_V_CXX)source='dfs.cpp' object='test_decompBG-dfs.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-dfs.obj `if test -f 'dfs.cpp'; then $(CYGPATH_W) 'dfs.cpp'; else $(CYGPATH_W) '$(srcdir)/dfs.cpp'; fi`
+
+test_decompBG-GomoryHu.o: GomoryHu.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-GomoryHu.o -MD -MP -MF $(DEPDIR)/test_decompBG-GomoryHu.Tpo -c -o test_decompBG-GomoryHu.o `test -f 'GomoryHu.cpp' || echo '$(srcdir)/'`GomoryHu.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-GomoryHu.Tpo $(DEPDIR)/test_decompBG-GomoryHu.Po
+#	$(AM_V_CXX)source='GomoryHu.cpp' object='test_decompBG-GomoryHu.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-GomoryHu.o `test -f 'GomoryHu.cpp' || echo '$(srcdir)/'`GomoryHu.cpp
+
+test_decompBG-GomoryHu.obj: GomoryHu.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -MT test_decompBG-GomoryHu.obj -MD -MP -MF $(DEPDIR)/test_decompBG-GomoryHu.Tpo -c -o test_decompBG-GomoryHu.obj `if test -f 'GomoryHu.cpp'; then $(CYGPATH_W) 'GomoryHu.cpp'; else $(CYGPATH_W) '$(srcdir)/GomoryHu.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_decompBG-GomoryHu.Tpo $(DEPDIR)/test_decompBG-GomoryHu.Po
+#	$(AM_V_CXX)source='GomoryHu.cpp' object='test_decompBG-GomoryHu.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_decompBG_CPPFLAGS) $(CPPFLAGS) $(test_decompBG_CXXFLAGS) $(CXXFLAGS) -c -o test_decompBG-GomoryHu.obj `if test -f 'GomoryHu.cpp'; then $(CYGPATH_W) 'GomoryHu.cpp'; else $(CYGPATH_W) '$(srcdir)/GomoryHu.cpp'; fi`
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -1411,6 +1540,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-GomoryHu.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-build_sub_bayesian_game.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-dfs.Po
+	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-two_players_bayesian_game.Po
 	-rm -f ./$(DEPDIR)/calculateQheuristic-calculateQheuristic.Po
 	-rm -f ./$(DEPDIR)/evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.Po
@@ -1423,6 +1553,11 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/printProblem-printProblem.Po
 	-rm -f ./$(DEPDIR)/printProblemStats-printProblemStats.Po
 	-rm -f ./$(DEPDIR)/prunePWLCValueFunction-prunePWLCValueFunction.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-GomoryHu.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-dfs.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-test_decompBG.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-two_players_bayesian_game.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1474,6 +1609,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-GomoryHu.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-build_sub_bayesian_game.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-dfs.Po
+	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-test_decompBG.Po
 	-rm -f ./$(DEPDIR)/build_sub_bayesian_game-two_players_bayesian_game.Po
 	-rm -f ./$(DEPDIR)/calculateQheuristic-calculateQheuristic.Po
 	-rm -f ./$(DEPDIR)/evaluateJointPolicyPureVector-evaluateJointPolicyPureVector.Po
@@ -1486,6 +1622,11 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/printProblem-printProblem.Po
 	-rm -f ./$(DEPDIR)/printProblemStats-printProblemStats.Po
 	-rm -f ./$(DEPDIR)/prunePWLCValueFunction-prunePWLCValueFunction.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-GomoryHu.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-build_sub_bayesian_game.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-dfs.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-test_decompBG.Po
+	-rm -f ./$(DEPDIR)/test_decompBG-two_players_bayesian_game.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

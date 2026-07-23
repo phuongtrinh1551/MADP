@@ -1,16 +1,11 @@
+#include "build_sub_bayesian_game.hpp" 
 #include <iostream>
-#include "two_players_bayesian_game.hpp"
 #include <vector>
 #include <cmath>
-#include "dfs.hpp"
 #include <algorithm>
 #include <unordered_map>
+#include "dfs.hpp"
 #include "GomoryHu.hpp"
-
-struct MatrixWithIndices {
-    std::pair<int, int> indices; 
-    int weight;
-};
 
 std::vector<MatrixWithIndices> sorted_matrix(std::vector<std::vector<int>> matrix) {
     int rows = matrix.size();
@@ -42,7 +37,7 @@ bool isImportantEdge(int a, int b, const std::vector<std::pair<int,int>>& import
 }
 
 std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types, int k, float eps){
-    // BUILD GRAPH OF CK BLOCKS
+// BUILD GRAPH OF CK BLOCKS
     int n1 = types[0].size();
     int n2 = types[1].size();
 
@@ -179,7 +174,7 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
     }
     std::cout<< "\n";
 
-    // USE dfs TO FIND THE CONNECTED COMPONENTS OF THE GRAPH
+// USE dfs TO FIND THE CONNECTED COMPONENTS OF THE GRAPH
     std::vector<std::vector<int>> CKblocks = getListBlocks(matrix_proba);
 
     return CKblocks;
@@ -247,12 +242,21 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
 
 
 std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
-    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg,types, 2, 0.01);
+    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg, types, 1, 0.09);
 
     std::vector<TwoPlayersBayesianGame> subgames;
 
     for (int i = 0; i < CKblocks.size(); i++){
-        std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
+        // separate the types for each player in the block following the order of the original types
+        std::vector<std::vector<int>> block(2);
+        for (int j = 0; j < CKblocks[i].size(); j++){
+            if (CKblocks[i][j] < types[0].size()){
+                block[0].push_back(CKblocks[i][j]);
+            } else {
+                block[1].push_back(CKblocks[i][j] - types[0].size());
+            }
+        }
+        //std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
         TwoPlayersBayesianGame subgame = build_sub_bayesian_game(bg, block, types);
         subgames.push_back(subgame);
     }
@@ -261,67 +265,84 @@ std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, s
 }
 
 
-int main() {
-    TwoPlayersBayesianGame bg;
+// int main() {
+//     TwoPlayersBayesianGame bg;
 
-    std::vector<std::vector<int>> block = {{0,1}, {0,1}};
+//     std::vector<std::vector<int>> block = {{0,1}, {0,1}};
 
-    std::vector<std::vector<int>> types = {{0, 1, 2, 3}, {0, 1, 2, 3}};
+//     std::vector<std::vector<int>> types = {{0, 1, 2, 3}, {0, 1, 2, 3}};
     
-    TwoPlayersBayesianGame subgame;
+//     TwoPlayersBayesianGame subgame;
 
-    int n1 = types[0].size();
-    int n2 = types[1].size();
-    int A1 = 2;
-    int A2 = 2;
+//     int n1 = types[0].size();
+//     int n2 = types[1].size();
+//     int A1 = 2;
+//     int A2 = 2;
 
-    bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
+//     bg.setTypeNumbers({std::to_string(n1), std::to_string(n2)});
 
-    // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it creates a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
-    bg.addJointTypeProbabilities({"0.16", "0.05", "0.005", "0.005"}); //type 0 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0.1", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 and 1 of P2
-    bg.addJointTypeProbabilities({"0.01", "0.02", "0.09", "0.1"}); 
-    bg.addJointTypeProbabilities({"0.02", "0.01", "0.11", "0.1"}); 
+//     // bg.addJointTypeProbabilities({"0.1", "0.2", "0.3", "0.4"}); => it creates a vector 1x4, but we want 2x2 : bg.jointTypeProbabilities = {{0.1, 0.2}, {0.3, 0.4}};
+//     bg.addJointTypeProbabilities({"0.16", "0.05", "0.005", "0.005"}); //type 0 of P1 with type 0 -> 3 of P2
+//     bg.addJointTypeProbabilities({"0.1", "0.2", "0.01", "0.01"}); //type 1 of P1 with type 0 -> 3 of P2
+//     bg.addJointTypeProbabilities({"0.01", "0.02", "0.09", "0.1"}); 
+//     bg.addJointTypeProbabilities({"0.02", "0.01", "0.11", "0.1"}); 
 
-    bg.setGameDimensions({std::to_string(A1), std::to_string(A2)}); //actions
+//     bg.setGameDimensions({std::to_string(A1), std::to_string(A2)}); //actions
 
-    for (int i =0; i<pow(A1,n1)*pow(A2,n2); i++){
-        std::vector<std::string> line;
-        int num = rand() % 10 + 1;
-        line.push_back(std::to_string(num));
-        bg.addPayoffLine(line);
-    }
+//     for (int i =0; i<pow(A1,n1)*pow(A2,n2); i++){
+//         std::vector<std::string> line;
+//         int num = rand() % 10 + 1;
+//         line.push_back(std::to_string(num));
+//         bg.addPayoffLine(line);
+//     }
 
-    subgame = build_sub_bayesian_game(&bg, block, types);
+//     subgame = build_sub_bayesian_game(&bg, block, types);
     
-    std::cout<< "Original game joint type probabilities: " << std::endl;
-    for (int i=0; i<bg.jointTypeProbabilities.size(); i++){
-        for (int j=0; j<bg.jointTypeProbabilities[i].size(); j++){
-            std::cout << bg.jointTypeProbabilities[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+//     std::cout<< "Original game joint type probabilities: " << std::endl;
+//     for (int i=0; i<bg.jointTypeProbabilities.size(); i++){
+//         for (int j=0; j<bg.jointTypeProbabilities[i].size(); j++){
+//             std::cout << bg.jointTypeProbabilities[i][j] << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+//     std::cout<< "\n";
 
-    std::cout << "Subgame joint type probabilities: " << std::endl;
-    for (int i=0; i<subgame.jointTypeProbabilities.size(); i++){
-        for (int j=0; j<subgame.jointTypeProbabilities[i].size(); j++){
-            std::cout << subgame.jointTypeProbabilities[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+//     std::cout << "Subgame joint type probabilities: " << std::endl;
+//     for (int i=0; i<subgame.jointTypeProbabilities.size(); i++){
+//         for (int j=0; j<subgame.jointTypeProbabilities[i].size(); j++){
+//             std::cout << subgame.jointTypeProbabilities[i][j] << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+//     std::cout<< "\n";
     
 
-    std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.09);
-    std::cout << "CK blocks: " << std::endl;
-    for (int i=0; i<vect.size(); i++){
-        std::cout << "Block " << i << ": "; 
-        for (int j=0; j<vect[i].size(); j++){
-            std::cout << vect[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
+//     std::vector<std::vector<int>> vect = build_CK_blocks(&bg, types, 1, 0.09);
+
+//     // visualize CK blocks
+//     std::cout << "CK blocks: " << std::endl;
+//     for (int i=0; i<vect.size(); i++){
+//         std::cout << "Block " << i << ": "; 
+//         for (int j=0; j<vect[i].size(); j++){
+//             std::cout << vect[i][j] << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+
+//     std::vector<TwoPlayersBayesianGame> subgames = decompose_game(&bg, types);
+
+//     // visualize subgames
+//     std::cout << "Subgames: " << std::endl;
+//     for (int i=0; i<subgames.size(); i++){
+//         std::cout << "Subgame " << i << ": " << std::endl;
+//         for (int j=0; j<subgames[i].jointTypeProbabilities.size(); j++){
+//             for (int k=0; k<subgames[i].jointTypeProbabilities[j].size(); k++){
+//                 std::cout << subgames[i].jointTypeProbabilities[j][k] << " ";
+//             }
+//             std::cout << std::endl;
+//         }
+//         std::cout<< "\n";
+//     }
     
-    return 0;
-}
+//     return 0;
+// }

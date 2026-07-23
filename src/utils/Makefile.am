@@ -16,7 +16,8 @@ PROGRAMS_NORMAL =  \
  printProblem\
  printProblemStats\
  prunePWLCValueFunction\
- build_sub_bayesian_game
+ build_sub_bayesian_game\
+ test_decompBG
 
 ##############
 # Includedirs, libdirs, libs and cflags for all programs 
@@ -157,6 +158,7 @@ prunePWLCValueFunction_CFLAGS=
 # Build build_sub_bayesian_game
 build_sub_bayesian_game_SOURCES = \
  build_sub_bayesian_game.cpp \
+ test_decompBG.cpp\
  two_players_bayesian_game.cpp \
  dfs.cpp \
  GomoryHu.cpp
@@ -168,6 +170,20 @@ build_sub_bayesian_game_CPPFLAGS = $(AM_CPPFLAGS) $(CPP_OPTIMIZATION_FLAGS)
 build_sub_bayesian_game_CXXFLAGS = $(CSTANDARD)
 build_sub_bayesian_game_CFLAGS =
 
+# Build test_decompBG
+test_decompBG_SOURCES = \
+ test_decompBG.cpp \
+ build_sub_bayesian_game.cpp \
+ two_players_bayesian_game.cpp \
+ dfs.cpp \
+ GomoryHu.cpp
+ 
+test_decompBG_LDADD = $(MADPLIBS_NORMAL_NOPARSER) $(MADP_LD)
+test_decompBG_LDFLAGS = $(AM_LDFLAGS) 
+test_decompBG_DEPENDENCIES = $(MADPLIBS_NORMAL_NOPARSER)
+test_decompBG_CPPFLAGS= $(AM_CPPFLAGS) $(CPP_OPTIMIZATION_FLAGS)
+test_decompBG_CXXFLAGS= $(CSTANDARD)
+test_decompBG_CFLAGS=
 
 ###############
 # All DYNAMIC libraries
