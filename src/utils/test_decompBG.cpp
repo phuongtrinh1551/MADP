@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+#include <set>
 
 #include "Globals.h"
 #include "BayesianGameIdenticalPayoff.h"
@@ -15,8 +16,6 @@
 int main () { 
     // //===== generate TwoPlayersBayesianGame manually =====
     TwoPlayersBayesianGame two_players_bg;
-
-    std::vector<std::vector<int>> block = {{0,1}, {0,1}};
 
     std::vector<std::vector<int>> types = {{0, 1, 2, 3}, {0, 1, 2, 3}};
     
@@ -43,8 +42,6 @@ int main () {
         line.push_back(std::to_string(num));
         two_players_bg.addPayoffLine(line);
     }
-
-    subgame = build_sub_bayesian_game(&two_players_bg, block, types);
     
     std::cout<< "Original game joint type probabilities: " << std::endl;
     for (int i=0; i<two_players_bg.jointTypeProbabilities.size(); i++){
@@ -76,21 +73,50 @@ int main () {
         }
         std::cout << std::endl;
     }
+    std::cout<< "\n";
 
-    std::vector<TwoPlayersBayesianGame> subgames = decompose_game(&two_players_bg, types);
+    // decompose game into subgame-mapping pairs
+    std::vector<std::pair<SubgameMapping, TwoPlayersBayesianGame>> infoSubgames = decompose_game(&two_players_bg, CK_blocks, types);
+    
+    // visualize subgames and their mapping tables
+    std::cout << "Subgames and Mappings:" << std::endl;
+    for (size_t i = 0; i < infoSubgames.size(); i++) {
+        const SubgameMapping& mapping = infoSubgames[i].first;
+        const TwoPlayersBayesianGame& subgame = infoSubgames[i].second;
 
-    // visualize subgames
-    std::cout << "Subgames: " << std::endl;
-    for (int i=0; i<subgames.size(); i++){
-        std::cout << "Subgame " << i << ": " << std::endl;
-        for (int j=0; j<subgames[i].jointTypeProbabilities.size(); j++){
-            for (int k=0; k<subgames[i].jointTypeProbabilities[j].size(); k++){
-                std::cout << subgames[i].jointTypeProbabilities[j][k] << " ";
+        std::cout << "--- Subgame " << i << " ---" << std::endl;
+        
+        std::cout << "P1 Local-to-Global Map: ";
+        for (int global_t1 : mapping.local_to_global_P1) {
+            std::cout << global_t1 << " ";
+        }
+        std::cout << "\nP2 Local-to-Global Map: ";
+        for (int global_t2 : mapping.local_to_global_P2) {
+            std::cout << global_t2 << " ";
+        }
+        std::cout << "\nJoint Probabilities:\n";
+
+        for (size_t j = 0; j < subgame.jointTypeProbabilities.size(); j++) {
+            for (size_t k = 0; k < subgame.jointTypeProbabilities[j].size(); k++) {
+                std::cout << subgame.jointTypeProbabilities[j][k] << " ";
             }
             std::cout << std::endl;
         }
-        std::cout<< "\n";
+        std::cout << "\n";
     }
+
+
+
+    // for (int i=0; i<subgames.size(); i++){
+    //     std::cout << "Subgame " << i << ": " << std::endl;
+    //     for (int j=0; j<subgames[i].jointTypeProbabilities.size(); j++){
+    //         for (int k=0; k<subgames[i].jointTypeProbabilities[j].size(); k++){
+    //             std::cout << subgames[i].jointTypeProbabilities[j][k] << " ";
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    //     std::cout<< "\n";
+    // }
 
     // ===== generate a random BG with the generateRandomBG function from BayesianGameIdenticalPayoff class =====
     // size_t nrAgents = 2;
@@ -181,23 +207,19 @@ int main () {
     //     std::cout<< "\n";
     // }  
 
-    // solve each subgame and combine the results into the global policy
+    // solve each subgame and combine results into global policies
     std::vector<int> global_policy_P1(n1, -1);
     std::vector<int> global_policy_P2(n2, -1);
 
-    std::cout << "\n Solving subgames with BFS" << std::endl;
-    for (size_t i = 0; i < subgames.size(); i++) {
-        std::cout << "\n--- Subgame " << i << " ---" << std::endl;
+    std::cout << "Solving subgames with BFS..." << std::endl;
+    for (size_t i = 0; i < infoSubgames.size(); i++) {
+        const SubgameMapping& mapping = infoSubgames[i].first;
+        const TwoPlayersBayesianGame& subgame = infoSubgames[i].second;
 
-        size_t sub_n1 = subgames[i].jointTypeProbabilities.size();
-        size_t sub_n2;
-        if (sub_n1 > 0) {
-            sub_n2 = subgames[i].jointTypeProbabilities[0].size();
-        }else{
-            sub_n2 = 0;
-        }
+        size_t sub_n1 = subgame.jointTypeProbabilities.size();
+        size_t sub_n2 = (sub_n1 > 0) ? subgame.jointTypeProbabilities[0].size() : 0;
         
-        if (sub_n1 == 0 || sub_n2 == 0) continue; // skip next part if subgame has no types
+        if (sub_n1 == 0 || sub_n2 == 0) continue; // skip empty subgames
 
         size_t nrAgents = 2;
         std::vector<size_t> nrActions = {static_cast<size_t>(A1), static_cast<size_t>(A2)};
@@ -209,7 +231,7 @@ int main () {
         // copy joint probabilities into MADP subgame
         for (size_t t1 = 0; t1 < sub_n1; ++t1) {
             for (size_t t2 = 0; t2 < sub_n2; ++t2) {
-                double prob = subgames[i].jointTypeProbabilities[t1][t2];
+                double prob = subgame.jointTypeProbabilities[t1][t2];
                 std::vector<Index> type_vec = {(Index)t1, (Index)t2};
                 Index jtype = subgame_ptr->IndividualToJointTypeIndices(type_vec);
                 subgame_ptr->SetProbability(jtype, prob);
@@ -222,57 +244,73 @@ int main () {
                 subgame_ptr->SetUtility(jt, ja, 1.0);
             }
         }
-        
-        // // visualize MADP subgame
-        // std::cout << "Subgame MADP " << i << "'s joint type probabilities: " << std::endl;
-        // for (size_t t1 = 0; t1 < sub_n1; ++t1) {
-        //     for (size_t t2 = 0; t2 < sub_n2; ++t2) {
-        //         std::vector<Index> type_vec = {(Index)t1, (Index)t2};
-        //         Index jtype = subgame_ptr->IndividualToJointTypeIndices(type_vec);
-        //         double prob = subgame_ptr->GetProbability(jtype);
-        //         std::cout << prob << " ";
-        //     }
-        //     std::cout << std::endl;
-        // }
-
 
         // initialize BFS Solver
         BGIP_SolverBruteForceSearch<JointPolicyPureVector> bfs_solver(subgame_ptr, 0, 1);
 
         // solve subgame
         double subgame_value = bfs_solver.Solve();
-        std::cout << "Subgame " << i << "'s optimal BFS value: " << subgame_value << std::endl;
+        std::cout << "Subgame " << i << " optimal BFS value: " << subgame_value << std::endl;
 
-        // get optimal strategy returned by BFS
         const JointPolicyPureVector& sub_policy = bfs_solver.GetJointPolicyPureVector();
 
+        // build global policies
         for (size_t local_t1 = 0; local_t1 < sub_n1; local_t1++) {
             Index best_a1 = sub_policy.GetActionIndex(0, local_t1);
-            if (i < CK_blocks.size() && local_t1 < CK_blocks[i].size()) {
-                int global_t1 = CK_blocks[i][local_t1] / n2;
-                global_policy_P1[global_t1] = best_a1;
-            }
+            int global_t1 = mapping.local_to_global_P1[local_t1];
+            global_policy_P1[global_t1] = best_a1;
         }
 
         for (size_t local_t2 = 0; local_t2 < sub_n2; local_t2++) {
             Index best_a2 = sub_policy.GetActionIndex(1, local_t2);
-            if (i < CK_blocks.size() && local_t2 < CK_blocks[i].size()) {
-                int global_t2 = CK_blocks[i][local_t2] % n2;
-                global_policy_P2[global_t2] = best_a2;
-            }
+            int global_t2 = mapping.local_to_global_P2[local_t2];
+            global_policy_P2[global_t2] = best_a2;
         }
     }
 
     // visualize combined global policies
-    std::cout << "\nCombined global policy from subgames" << std::endl;
+    std::cout << "\nCombined global policy from subgames:" << std::endl;
     for (size_t t1 = 0; t1 < n1; ++t1) {
-        std::cout << "Player 1 (Type " << t1 << ") -> Optimal action: " << global_policy_P1[t1] << std::endl;
+        std::cout << "Player 1 (Type " << t1 << ") => Optimal action: " << global_policy_P1[t1] << std::endl;
     }
     for (size_t t2 = 0; t2 < n2; ++t2) {
-        std::cout << "Player 2 (Type " << t2 << ") -> Optimal action: " << global_policy_P2[t2] << std::endl;
+        std::cout << "Player 2 (Type " << t2 << ") => Optimal action: " << global_policy_P2[t2] << std::endl;
     }
 
-    // evaluate the combined strategy on the original BG
+    // solve original game with BFS to compare
+    size_t nrAgents = 2;
+    BGIP_sharedPtr original_game_ptr(new BayesianGameIdenticalPayoff(nrAgents, {static_cast<size_t>(A1), static_cast<size_t>(A2)}, {static_cast<size_t>(n1), static_cast<size_t>(n2)}));
+
+    for (size_t t1 = 0; t1 < n1; ++t1) {
+        for (size_t t2 = 0; t2 < n2; ++t2) {
+            double prob = two_players_bg.jointTypeProbabilities[t1][t2];
+            std::vector<Index> type_vec = {(Index)t1, (Index)t2};
+            Index jtype = original_game_ptr->IndividualToJointTypeIndices(type_vec);
+            original_game_ptr->SetProbability(jtype, prob);
+        }
+    }
+
+    for (Index jt = 0; jt < original_game_ptr->GetNrJointTypes(); ++jt) {
+        for (Index ja = 0; ja < original_game_ptr->GetNrJointActions(); ++ja) {
+            original_game_ptr->SetUtility(jt, ja, 1.0);
+        }
+    }
+
+    BGIP_SolverBruteForceSearch<JointPolicyPureVector> original_bfs_solver(original_game_ptr, 0, 1);
+
+    double original_game_value = original_bfs_solver.Solve();
+
+    std::cout << "\nOriginal game optimal BFS value: " << original_game_value << std::endl;
+    for (size_t t1 = 0; t1 < n1; ++t1) {
+        Index best_a1 = original_bfs_solver.GetJointPolicyPureVector().GetActionIndex(0, t1);
+        std::cout << "Player 1 (Type " << t1 << ") => Optimal action: " << best_a1 << std::endl;
+    }
+    for (size_t t2 = 0; t2 < n2; ++t2) {
+        Index best_a2 = original_bfs_solver.GetJointPolicyPureVector().GetActionIndex(1, t2);
+        std::cout << "Player 2 (Type " << t2 << ") => Optimal action: " << best_a2 << std::endl;
+    }
+    
+    // // evaluate the combined strategy on the original BG
 
     return 0;
 }

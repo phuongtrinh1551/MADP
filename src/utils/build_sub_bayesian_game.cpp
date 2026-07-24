@@ -74,30 +74,30 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
         }
     }
 
-    // visualize graph before removing edges
-    std::cout << "Graph before removing edges: " << std::endl;
-    for (int i=0;i<graph.size();i++){
-        for (int j=0;j<graph[i].size();j++){
-            std::cout << graph[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+    // // visualize graph before removing edges
+    // std::cout << "Graph before removing edges: " << std::endl;
+    // for (int i=0;i<graph.size();i++){
+    //     for (int j=0;j<graph[i].size();j++){
+    //         std::cout << graph[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout<< "\n";
 
     // cut edges: build GH tree -> sort edges -> remove edges with weight < eps*10^c
     // build GH tree
     GomoryHuTree ght(n1+n2, graph);
     std::vector<std::vector<int>> gomory_hu_tree = ght.buildGomoryHuTree();
 
-    // visualize GH tree
-    std::cout << "Gomory-Hu tree: " << std::endl;
-    for (int i=0;i<gomory_hu_tree.size();i++){
-        for (int j=0;j<gomory_hu_tree[i].size();j++){
-            std::cout << gomory_hu_tree[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+    // // visualize GH tree
+    // std::cout << "Gomory-Hu tree: " << std::endl;
+    // for (int i=0;i<gomory_hu_tree.size();i++){
+    //     for (int j=0;j<gomory_hu_tree[i].size();j++){
+    //         std::cout << gomory_hu_tree[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout<< "\n";
     
     // extract important edges from GH tree (edges with weight > 0)
     std::vector<std::pair<int,int>> important_edges;
@@ -115,16 +115,7 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
     // try to remove maximum edges + respect eps*10^c
     int sum_removed_edges = 0;
     int removed_edges = 0;
-    // for (int i=0;i<sorted_edges.size();i++){
-    //     if (sorted_edges[i].weight > 0 && sorted_edges[i].weight < eps*std::pow(10,c) && ){
-    //         graph[sorted_edges[i].indices.first][sorted_edges[i].indices.second] = 0;
-    //         graph[sorted_edges[i].indices.second][sorted_edges[i].indices.first] = 0;
-    //         sum_removed_edges += sorted_edges[i].weight;
-    //         // std::cout << "Removed edge: (" << sorted_edges[i].indices.first << ", " << sorted_edges[i].indices.second << "), weight: " << sorted_edges[i].weight << std::endl;
-    //         removed_edges++;
-    //     }
-        
-    // }
+    
     for(auto edge : sorted_edges){
         if(edge.weight < eps*pow(10,c) && !isImportantEdge(edge.indices.first,edge.indices.second,important_edges)){
             graph[edge.indices.first][edge.indices.second]=0;
@@ -135,25 +126,25 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
     // sum removed
     std::cout << "Removed edges: " << removed_edges << ", sum of removed edges: " << sum_removed_edges << std::endl;
 
-    // visualize graph after removing edges 
-    std::cout << "Graph after removing edges: " << std::endl;
-    for (int i=0;i<graph.size();i++){
-        for (int j=0;j<graph[i].size();j++){
-            std::cout << graph[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+    // // visualize graph after removing edges 
+    // std::cout << "Graph after removing edges: " << std::endl;
+    // for (int i=0;i<graph.size();i++){
+    //     for (int j=0;j<graph[i].size();j++){
+    //         std::cout << graph[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout<< "\n";
 
-    // visualize matrix proba before removing edges by eps
-    std::cout << "Matrix proba before removing edges by eps: " << std::endl;
-    for (int i=0;i<matrix_proba.size();i++){
-        for (int j=0;j<matrix_proba[i].size();j++){
-            std::cout << matrix_proba[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout<< "\n";
+    // // visualize matrix proba before removing edges by eps
+    // std::cout << "Matrix proba before removing edges by eps: " << std::endl;
+    // for (int i=0;i<matrix_proba.size();i++){
+    //     for (int j=0;j<matrix_proba[i].size();j++){
+    //         std::cout << matrix_proba[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout<< "\n";
 
     // update matrix_proba
     for (int i=0; i<n1; i++){
@@ -181,9 +172,18 @@ std::vector<std::vector<int>> build_CK_blocks(TwoPlayersBayesianGame* bg, std::v
 }
 
 
-TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const std::vector<std::vector<int>>& block, std::vector<std::vector<int>> types){
-    TwoPlayersBayesianGame subgame;
+std::pair<SubgameMapping,TwoPlayersBayesianGame> build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const std::vector<std::vector<int>>& block){
+    std::pair<SubgameMapping,TwoPlayersBayesianGame> result;
+    SubgameMapping table;
+    TwoPlayersBayesianGame subgame; 
 
+
+    // BUILD the  SubgameMapping table
+    table.local_to_global_P1 = block[0]; // => local_to_global_P1[0] = x which means local type 0 of P1 in this subgame is x in the global BG
+    table.local_to_global_P2 = block[1];
+
+
+    // BUILD SUBGAME
     int n1 = block[0].size();
     int n2 = block[1].size();
 
@@ -237,14 +237,16 @@ TwoPlayersBayesianGame build_sub_bayesian_game(TwoPlayersBayesianGame* bg, const
         }
     }
 
-    return subgame;
+    result.first = table;
+    result.second = subgame;
+
+    return result;
 }
 
 
-std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> types){
-    std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg, types, 1, 0.09);
-
-    std::vector<TwoPlayersBayesianGame> subgames;
+std::vector<std::pair<SubgameMapping,TwoPlayersBayesianGame>> decompose_game(TwoPlayersBayesianGame* bg, std::vector<std::vector<int>> CKblocks, std::vector<std::vector<int>> types){
+    // std::vector<std::vector<int>> CKblocks = build_CK_blocks(bg, types, 1, 0.09);
+    std::vector<std::pair<SubgameMapping,TwoPlayersBayesianGame>> res;
 
     for (int i = 0; i < CKblocks.size(); i++){
         // separate the types for each player in the block following the order of the original types
@@ -256,12 +258,14 @@ std::vector<TwoPlayersBayesianGame> decompose_game(TwoPlayersBayesianGame* bg, s
                 block[1].push_back(CKblocks[i][j] - types[0].size());
             }
         }
-        //std::vector<std::vector<int>> block = {CKblocks[i], CKblocks[i]};
-        TwoPlayersBayesianGame subgame = build_sub_bayesian_game(bg, block, types);
-        subgames.push_back(subgame);
+        
+        std::sort(block[0].begin(), block[0].end());
+        std::sort(block[1].begin(), block[1].end());
+        std::pair<SubgameMapping,TwoPlayersBayesianGame> infoSubgame = build_sub_bayesian_game(bg, block);
+        res.push_back(infoSubgame);
     }
 
-    return subgames;
+    return res;
 }
 
 
